@@ -47,3 +47,6 @@ target
 .wtpmodules
 bin/
 .settings/*
+maven-build.properties
+build.xml
+maven-build.xml

@@ -73,6 +73,28 @@ public class ZreLog
 
     }
 
+    //  Record one log event
+    public void warn (int event, String peer, String format, Object ... args)
+    {
+        int peerid = peer != null ? peer.hashCode () : 0;
+        String body = format != null ? String.format (format, args) : "";
+        
+        sendLog (publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_WARNING,
+                event, nodeid, peerid, System.currentTimeMillis (), body);
+
+    }
+
+    //  Record one log event
+    public void error (int event, String peer, String format, Object ... args)
+    {
+        int peerid = peer != null ? peer.hashCode () : 0;
+        String body = format != null ? String.format (format, args) : "";
+        
+        sendLog (publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_ERROR,
+                event, nodeid, peerid, System.currentTimeMillis (), body);
+
+    }
+
     //  --------------------------------------------------------------------------
     //  Send the LOG to the socket in one step
     public static boolean sendLog (Socket output, 

@@ -25,6 +25,7 @@
 */
 package org.zyre;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class ZrePeer
     private static final int USHORT_MAX = 0xffff;
     private static final int UBYTE_MAX = 0xff;
     
-    private ZContext ctx;                //  CZMQ context
+	private final WeakReference<ZContext> weakCtx;          //  CZMQ context // XXX saki
     private Socket mailbox;              //  Socket through to peer
     private String identity;             //  Identity string
     private String endpoint;             //  Endpoint connected to
@@ -50,9 +51,9 @@ public class ZrePeer
     private int want_sequence;           //  Incoming message sequence
     private Map <String, String> headers;           //  Peer headers
     
-    private ZrePeer (ZContext ctx, String identity)
+    private ZrePeer (final ZContext ctx, final String identity)
     {
-        this.ctx = ctx;
+		this.weakCtx = new WeakReference<ZContext>(ctx);
         this.identity = identity;
         
         ready = false;
@@ -63,9 +64,9 @@ public class ZrePeer
     
     //  ---------------------------------------------------------------------
     //  Construct new peer object
-    public static ZrePeer newPeer (String identity, Map<String, ZrePeer> container, ZContext ctx)
+    public static ZrePeer newPeer (final String identity, final Map<String, ZrePeer> container, final ZContext ctx)
     {
-        ZrePeer peer = new ZrePeer (ctx, identity);
+        final ZrePeer peer = new ZrePeer (ctx, identity);
         container.put (identity, peer);
         
         return peer;
@@ -81,29 +82,33 @@ public class ZrePeer
     //  ---------------------------------------------------------------------
     //  Connect peer mailbox
     //  Configures mailbox and connects to peer's router endpoint
-    public void connect (String replyTo, String endpoint)
+    public void connect (final String replyTo, final String endpoint)
     {
+		disconnect();	// XXX saki
+		final ZContext ctx = weakCtx.get();
+		if (ctx != null) {
         //  Create new outgoing socket (drop any messages in transit)
-        mailbox = ctx.createSocket (ZMQ.DEALER);
+	        mailbox = ctx.createSocket (ZMQ.DEALER);
 
-        //  Null if shutting down
-        if (mailbox != null) {
-            //  Set our caller 'From' identity so that receiving node knows
-            //  who each message came from.
-            mailbox.setIdentity (replyTo.getBytes ());
+    	    //  Null if shutting down
+        	if (mailbox != null) {
+            	//  Set our caller 'From' identity so that receiving node knows
+	            //  who each message came from.
+    	        mailbox.setIdentity (replyTo.getBytes ());
     
-            //  Set a high-water mark that allows for reasonable activity
-            mailbox.setSndHWM (ZreInterface.PEER_EXPIRED * 100);
+        	    //  Set a high-water mark that allows for reasonable activity
+            	mailbox.setSndHWM (ZreInterface.PEER_EXPIRED * 100);
            
-            //  Send messages immediately or return EAGAIN
-            mailbox.setSendTimeOut (0);
+	            //  Send messages immediately or return EAGAIN
+    	        mailbox.setSendTimeOut (0);
     
-            //  Connect through to peer node
-            mailbox.connect (String.format ("tcp://%s", endpoint));
-            this.endpoint = endpoint;
-            connected = true;
-            ready = false;        
-        }
+        	    //  Connect through to peer node
+            	mailbox.connect (String.format ("tcp://%s", endpoint));
+	            this.endpoint = endpoint;
+    	        connected = true;
+        	    ready = false;        
+	        }
+	    }
     }
 
     //  ---------------------------------------------------------------------
@@ -111,13 +116,18 @@ public class ZrePeer
     //  No more messages will be sent to peer until connected again
     public void disconnect ()
     {
-        ctx.destroySocket (mailbox);
+		final ZContext ctx = weakCtx.get();
+		if (ctx != null) {
+			if (mailbox != null) {
+				ctx.destroySocket(mailbox);
+			}
+		}
         mailbox = null;
         endpoint = null;
         connected = false;
     }
 
-    public boolean send (ZreMsg msg)
+    public boolean send (final ZreMsg msg)
     {
         if (connected) {
             if (++sent_sequence > USHORT_MAX)
@@ -168,7 +178,7 @@ public class ZrePeer
     }
 
     
-    public void setReady (boolean ready)
+    public void setReady (final boolean ready)
     {
         this.ready = ready;
     }
@@ -178,7 +188,7 @@ public class ZrePeer
         return ready;
     }
 
-    public void setStatus (int status)
+    public void setStatus (final int status)
     {
         this.status = status;
     }
@@ -199,7 +209,7 @@ public class ZrePeer
         return identity;
     }
 
-    public String header (String key, String defaultValue)
+    public String header (final String key, final String defaultValue)
     {
         if (headers.containsKey (key))
             return headers.get (key);
@@ -207,12 +217,12 @@ public class ZrePeer
         return defaultValue;
     }
     
-    public void setHeaders (Map<String, String> headers)
+    public void setHeaders (final Map<String, String> headers)
     {
         this.headers = new HashMap <String, String> (headers);
     }
 
-    public boolean checkMessage (ZreMsg msg)
+    public boolean checkMessage (final ZreMsg msg)
     {
         int recd_sequence = msg.sequence ();
         if (++want_sequence > USHORT_MAX)

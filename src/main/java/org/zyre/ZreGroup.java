@@ -35,7 +35,7 @@ public class ZreGroup
     private final String name;
     private final Map <String, ZrePeer> peers;
     
-    private ZreGroup (String name)
+    private ZreGroup (final String name)
     {
         this.name = name;
         peers = new HashMap <String, ZrePeer> ();
@@ -49,9 +49,9 @@ public class ZreGroup
     
     //  ---------------------------------------------------------------------
     //  Construct new group object
-    public static ZreGroup newGroup (String name, Map<String, ZreGroup> container)
+    public static ZreGroup newGroup (final String name, final Map<String, ZreGroup> container)
     {
-        ZreGroup group = new ZreGroup (name);
+        final ZreGroup group = new ZreGroup (name);
         container.put (name, group);
         
         return group;
@@ -60,7 +60,7 @@ public class ZreGroup
     //  ---------------------------------------------------------------------
     //  Add peer to group
     //  Ignore duplicate joins
-    public void join (ZrePeer peer)
+    public void join (final ZrePeer peer)
     {
         peers.put (peer.identity (), peer);
         peer.incStatus ();
@@ -69,7 +69,7 @@ public class ZreGroup
 
     //  ---------------------------------------------------------------------
     //  Remove peer from group
-    public void leave (ZrePeer peer)
+    public void leave (final ZrePeer peer)
     {
         peers.remove (peer.identity ());
         peer.incStatus ();
@@ -79,7 +79,7 @@ public class ZreGroup
     //  Send message to all peers in group
     public void send (ZreMsg msg)
     {
-        for (ZrePeer peer: peers.values ())
+        for (final ZrePeer peer: peers.values ())
             peer.send (msg.dup ());
         
         msg.destroy ();
