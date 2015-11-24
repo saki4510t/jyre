@@ -621,30 +621,34 @@ public class ZreInterface
         {
             final Iterator <Map.Entry <String, ZrePeer>> it = peers.entrySet ().iterator ();
             while (it.hasNext ()) {
-                final Map.Entry<String, ZrePeer> entry = it.next ();
-                final String identity = entry.getKey ();
-                final ZrePeer peer = entry.getValue ();
-                if (System.currentTimeMillis () >= peer.expiredAt ()) {
-                    log.info (ZreLogMsg.ZRE_LOG_MSG_EVENT_EXIT,
-                            peer.endpoint (),
-                            peer.endpoint ());
-                    //  If peer has really vanished, expire it
-                    pipe.sendMore ("EXIT");
-					pipe.sendMore (identity);	// XXX saki
-					pipe.send (identity);	// XXX saki
-                    deletePeerFromGroups (peer_groups, peer);
-                    it.remove ();
-                    peer.destroy ();
-                } 
-                else 
-                if (System.currentTimeMillis () >= peer.evasiveAt ()){
-                    //  If peer is being evasive, force a TCP ping.
-                    //  TODO: do this only once for a peer in this state;
-                    //  it would be nicer to use a proper state machine
-                    //  for peer management.
-                    final ZreMsg msg = new ZreMsg (ZreMsg.PING);
-                    peer.send (msg);
-                }
+				try {	// XXX saki
+	                final Map.Entry<String, ZrePeer> entry = it.next ();
+    	            final String identity = entry.getKey ();
+        	        final ZrePeer peer = entry.getValue ();
+            	    if (System.currentTimeMillis () >= peer.expiredAt ()) {
+                	    log.info (ZreLogMsg.ZRE_LOG_MSG_EVENT_EXIT,
+                    	        peer.endpoint (),
+                        	    peer.endpoint ());
+	                    //  If peer has really vanished, expire it
+    	                pipe.sendMore ("EXIT");
+						pipe.sendMore (identity);	// XXX saki
+						pipe.send (identity);	// XXX saki
+                	    deletePeerFromGroups (peer_groups, peer);
+                    	it.remove ();
+	                    peer.destroy ();
+    	            } 
+        	        else 
+            	    if (System.currentTimeMillis () >= peer.evasiveAt ()){
+                	    //  If peer is being evasive, force a TCP ping.
+                    	//  TODO: do this only once for a peer in this state;
+	                    //  it would be nicer to use a proper state machine
+    	                //  for peer management.
+        	            final ZreMsg msg = new ZreMsg (ZreMsg.PING);
+            	        peer.send (msg);
+                	}
+				} catch (final ZMQException e) {	// XXX saki
+					break;
+				}
             }
         }
 
