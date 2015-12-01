@@ -71,7 +71,9 @@ public class ZreInterface
     {
 		mNodeName = !TextUtils.isEmpty(name) ? name : "";
         ctx = new ZContext ();
+        ctx.setLinger(100);	// XXX saki
         pipe = ZThread.fork (ctx, new ZreInterfaceAgent (this));
+        pipe.setLinger(100);	// XXX saki
     }
     
     //  ---------------------------------------------------------------------
