@@ -59,6 +59,8 @@ public class ZreInterface
     private Socket pipe;        //  Pipe through to agent
 	private String mNodeName = "";	// XXX saki take care not to set null to this field, set "" instead. otherwise Socket#sendMore/#send crash
 	private String mUuid = "";		// XXX saki
+	private final Object mPipeSync = new Object();	// XXX saki
+	private boolean initialized;	// XXX saki
     //  ---------------------------------------------------------------------
     //  Constructor
     
@@ -72,7 +74,18 @@ public class ZreInterface
 		mNodeName = !TextUtils.isEmpty(name) ? name : "";
         ctx = new ZContext ();
         ctx.setLinger(100);	// XXX saki
-        pipe = ZThread.fork (ctx, new ZreInterfaceAgent (this));
+		synchronized (mPipeSync) {	// XXX saki
+			if (!initialized) {
+		        pipe = ZThread.fork (ctx, new ZreInterfaceAgent (this));
+				try {
+					mPipeSync.wait(3000);	// wait for initializing Agent
+				} catch (final InterruptedException e) {
+				}
+			}
+		}
+		if (!initialized) {	// XXX saki
+			throw new RuntimeException("failed to initialize socket");
+		}
         pipe.setLinger(100);	// XXX saki
     }
     
@@ -678,7 +691,6 @@ public class ZreInterface
     {
 
 		private final WeakReference<ZreInterface> mWeakParent; // XXX saki
-		private final Object mSync = new Object(); // XXX saki
 		public ZreInterfaceAgent(final ZreInterface parent)
 		{
 			mWeakParent = new WeakReference<ZreInterface>(parent); // XXX saki
@@ -687,19 +699,25 @@ public class ZreInterface
         @Override
         public void run (final Object[] args, final ZContext ctx, final Socket pipe)
         {
-			final Agent agent;
-			synchronized (mSync) { // XXX saki
-				final ZreInterface parent = mWeakParent.get();
-				if (parent != null) {
-					agent = Agent.newAgent(ctx, pipe, parent);
-					parent.mUuid = agent != null ? agent.uuid() : "";
-					mSync.notifyAll();
-					if (agent == null) {   //  Interrupted
-						return;
+			Agent agent = null;
+			final ZreInterface parent = mWeakParent.get();	// XXX saki
+			if (parent != null) {
+				synchronized(parent.mPipeSync) {
+					try {
+						agent = Agent.newAgent(ctx, pipe, parent);
+						if (agent != null) {
+							// success
+							parent.mUuid = agent.uuid();
+							parent.initialized = true;
+						}
+					} catch (final Exception e) {
+						e.printStackTrace();
 					}
-				} else {
-					return;
+					parent.mPipeSync.notifyAll();
 				}
+			}
+			if (agent == null) {   //  Interrupted etc.
+				return;
 			}
             
             long pingAt = System.currentTimeMillis ();
