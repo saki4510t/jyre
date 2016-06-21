@@ -61,16 +61,28 @@ public class ZreInterface
 	private String mUuid = "";		// XXX saki
 	private final Object mPipeSync = new Object();	// XXX saki
 	private boolean initialized;	// XXX saki
+	private final mBeaconPort;		// XXX saki
     //  ---------------------------------------------------------------------
     //  Constructor
     
     public ZreInterface () 
     {
-    	this(null);
+    	this(null, PING_PORT_NUMBER);
     }
-    
-    public ZreInterface (final String name) // XXX saki
+
+    public ZreInterface (final int beacon_port)  // XXX saki
     {
+    	this(null, beacon_port);
+    }
+
+    public ZreInterface (final String name)  // XXX saki
+    {
+    	this(name, PING_PORT_NUMBER);
+    }
+	
+    public ZreInterface (final String name, final int beacon_port) // XXX saki
+    {
+		mBeaconPort = beacon_port > 0 ? beacon_port : PING_PORT_NUMBER;
 		mNodeName = !TextUtils.isEmpty(name) ? name : "";
         ctx = new ZContext ();
         ctx.setLinger(100);	// XXX saki
@@ -291,7 +303,7 @@ public class ZreInterface
             if (inbox == null)      //  Interrupted
                 return null;
 
-            final ZreUdp udp = new ZreUdp (PING_PORT_NUMBER);
+            final ZreUdp udp = new ZreUdp (parent.mBeaconPort);	// XXX saki
             final int port = inbox.bindToRandomPort ("tcp://*", 0xc000, 0xffff);
             if (port < 0) {          //  Interrupted
                 System.err.println ("Failed to bind a random port");
