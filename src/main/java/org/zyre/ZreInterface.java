@@ -61,7 +61,7 @@ public class ZreInterface
 	private String mUuid = "";		// XXX saki
 	private final Object mPipeSync = new Object();	// XXX saki
 	private boolean initialized;	// XXX saki
-	private final mBeaconPort;		// XXX saki
+	private final int mBeaconPort;	// XXX saki
     //  ---------------------------------------------------------------------
     //  Constructor
     
