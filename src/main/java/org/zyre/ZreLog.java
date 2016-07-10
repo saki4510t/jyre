@@ -22,98 +22,134 @@
     License along with this program. If not, see
     <http://www.gnu.org/licenses/>.
     =========================================================================
-*/ 
+    XXX t_saki@serenegiant.com
+    Add JavaDoc
+*/
 package org.zyre;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
 
-public class ZreLog
-{
+public class ZreLog {
 
-    private final ZContext ctx;         //  CZMQ context
-    private final Socket publisher;     //  Socket to send to
-    private int nodeid;                //  Own correlation ID
-    
-    //  ---------------------------------------------------------------------
-    //  Construct new log object
-    public ZreLog (String endpoint)
-    {
-        ctx = new ZContext ();
-        publisher = ctx.createSocket (ZMQ.PUB);
-        //  Modified Bernstein hashing function
-        nodeid = endpoint.hashCode ();
-    }
+	private final ZContext ctx;			//  CZMQ context
+	private final Socket publisher;		//  Socket to send to
+	private int nodeid;					//  Own correlation ID
 
-    //  ---------------------------------------------------------------------
-    //  Destroy log object
-    public void destroy ()
-    {
-        ctx.destroy ();
-    }
+//---------------------------------------------------------------------
+	/**
+	 * Construct new log object
+	 * @param endpoint
+	 */
+	public ZreLog(final String endpoint) {
+		ctx = new ZContext();
+		publisher = ctx.createSocket(ZMQ.PUB);
+		//  Modified Bernstein hashing function
+		nodeid = endpoint.hashCode();
+	}
 
+//---------------------------------------------------------------------
+	/**
+	 * Destroy log object
+	 */
+	public void destroy() {
+		ctx.destroy();
+	}
 
-    //  ---------------------------------------------------------------------
-    //  Connect log to remote endpoint
-    public void connect (String endpoint)
-    {
-        publisher.connect (endpoint);
-    }
-    
-    //  ---------------------------------------------------------------------
-    //  Record one log event
-    public void info (int event, String peer, String format, Object ... args)
-    {
-        int peerid = peer != null ? peer.hashCode () : 0;
-        String body = format != null ? String.format (format, args) : "";
-        
-        sendLog (publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_INFO,
-                event, nodeid, peerid, System.currentTimeMillis (), body);
+//---------------------------------------------------------------------
+	/**
+	 * Connect log to remote endpoint
+	 * @param endpoint
+	 */
+	public void connect(final String endpoint) {
+		publisher.connect(endpoint);
+	}
 
-    }
+//---------------------------------------------------------------------
+	/**
+	 * Record one log event
+	 * @param peer
+	 * @param format
+	 * @param args
+	 */
+	public void debug(final String peer, final String format, final Object... args) {
+		final int peerid = peer != null ? peer.hashCode() : 0;
+		final String body = format != null ? String.format(format, args) : "";
 
-    //  Record one log event
-    public void warn (int event, String peer, String format, Object ... args)
-    {
-        int peerid = peer != null ? peer.hashCode () : 0;
-        String body = format != null ? String.format (format, args) : "";
-        
-        sendLog (publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_WARNING,
-                event, nodeid, peerid, System.currentTimeMillis (), body);
+		sendLog(publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_DEBUG,
+				ZreLogMsg.ZRE_LOG_MSG_EVENT_DEBUG, nodeid, peerid, System.currentTimeMillis(), body);
+	}
 
-    }
+	/**
+	 * Record one log event
+ 	 * @param event
+	 * @param peer
+	 * @param format
+	 * @param args
+	 */
+	public void info(final int event, final String peer, final String format, final Object... args) {
+		final int peerid = peer != null ? peer.hashCode() : 0;
+		final String body = format != null ? String.format(format, args) : "";
 
-    //  Record one log event
-    public void error (int event, String peer, String format, Object ... args)
-    {
-        int peerid = peer != null ? peer.hashCode () : 0;
-        String body = format != null ? String.format (format, args) : "";
-        
-        sendLog (publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_ERROR,
-                event, nodeid, peerid, System.currentTimeMillis (), body);
+		sendLog(publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_INFO,
+				event, nodeid, peerid, System.currentTimeMillis(), body);
+	}
 
-    }
+	/**
+	 * Record one log event
+	 * @param event
+	 * @param peer
+	 * @param format
+	 * @param args
+	 */
+	public void warn(final int event, final String peer, final String format, final Object... args) {
+		final int peerid = peer != null ? peer.hashCode() : 0;
+		final String body = format != null ? String.format(format, args) : "";
 
-    //  --------------------------------------------------------------------------
-    //  Send the LOG to the socket in one step
-    public static boolean sendLog (Socket output, 
-                                    int level, 
-                                    int event, 
-                                    int node, 
-                                    int peer, 
-                                    long time, 
-                                    String data)
-    {
-        ZreLogMsg msg = new ZreLogMsg (ZreLogMsg.LOG);
-        msg.setLevel (level);
-        msg.setEvent (event);
-        msg.setNode (node);
-        msg.setPeer (peer);
-        msg.setTime (time);
-        msg.setData (data);
-        
-        return msg.send (output);
-    }
-    
+		sendLog(publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_WARNING,
+				event, nodeid, peerid, System.currentTimeMillis(), body);
+	}
+
+	/**
+	 * Record one log event
+	 * @param event
+	 * @param peer
+	 * @param format
+	 * @param args
+	 */
+	public void error(final int event, final String peer, final String format, final Object... args) {
+		final int peerid = peer != null ? peer.hashCode() : 0;
+		final String body = format != null ? String.format(format, args) : "";
+
+		sendLog(publisher, ZreLogMsg.ZRE_LOG_MSG_LEVEL_ERROR,
+				event, nodeid, peerid, System.currentTimeMillis(), body);
+	}
+
+//--------------------------------------------------------------------------
+	/**
+	 * Send the LOG to the socket in one step
+	 * @param output
+	 * @param level
+	 * @param event
+	 * @param node
+	 * @param peer
+	 * @param time
+	 * @param data
+	 * @return
+	 */
+	public static boolean sendLog(final Socket output, final int level, final int event,
+		final int node, final int peer, final long time, final String data) {
+
+		final ZreLogMsg msg = new ZreLogMsg(ZreLogMsg.LOG);
+		msg.setLevel(level);
+		msg.setEvent(event);
+		msg.setNode(node);
+		msg.setPeer(peer);
+		msg.setTime(time);
+		msg.setData(data);
+
+		return msg.send(output);
+	}
+
 }

@@ -22,67 +22,88 @@
     License along with this program. If not, see
     <http://www.gnu.org/licenses/>. 
     =========================================================================
-*/ 
+    XXX t_saki@serenegiant.com
+    Use ZreIdentity and fit to 36/ZRE ZeroM RFC, add JavaDoc
+*/
 package org.zyre;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ZreGroup
-{
+public class ZreGroup {
 
-    @SuppressWarnings ("unused")
-    private final String name;
-    private final Map <String, ZrePeer> peers;
-    
-    private ZreGroup (final String name)
-    {
-        this.name = name;
-        peers = new HashMap <String, ZrePeer> ();
-    }
-    
-    //  ---------------------------------------------------------------------
-    //  Destroy group object
-    public void destroy ()
-    {
-    }
-    
-    //  ---------------------------------------------------------------------
-    //  Construct new group object
-    public static ZreGroup newGroup (final String name, final Map<String, ZreGroup> container)
-    {
-        final ZreGroup group = new ZreGroup (name);
-        container.put (name, group);
-        
-        return group;
-    }
+	private final String name;
+	private final Map<ZreIdentity, ZrePeer> peers;
 
-    //  ---------------------------------------------------------------------
-    //  Add peer to group
-    //  Ignore duplicate joins
-    public void join (final ZrePeer peer)
-    {
-        peers.put (peer.identity (), peer);
-        peer.incStatus ();
-    }
-    
+	private ZreGroup(final String name) {
+		this.name = name;
+		peers = new HashMap<ZreIdentity, ZrePeer>();
+	}
 
-    //  ---------------------------------------------------------------------
-    //  Remove peer from group
-    public void leave (final ZrePeer peer)
-    {
-        peers.remove (peer.identity ());
-        peer.incStatus ();
-    }
-    
-    //  ---------------------------------------------------------------------
-    //  Send message to all peers in group
-    public void send (ZreMsg msg)
-    {
-        for (final ZrePeer peer: peers.values ())
-            peer.send (msg.dup ());
-        
-        msg.destroy ();
-    }
+//---------------------------------------------------------------------
+	/**
+	 * Destroy group object
+	 */
+	public void destroy() {
+	}
 
+//---------------------------------------------------------------------
+	/**
+	 * Construct new group object
+	 * @param name
+	 * @param container
+	 * @return
+	 */
+	public static ZreGroup newGroup(final String name, final Map<String, ZreGroup> container) {
+		final ZreGroup group = new ZreGroup(name);
+		container.put(name, group);
+
+		return group;
+	}
+
+//---------------------------------------------------------------------
+	/**
+	 * Add peer to group
+	 * Ignore duplicate joins
+	 * @param peer
+	 */
+	public void join(final ZrePeer peer) {
+		peers.put(peer.identity(), peer);
+		peer.incStatus();
+	}
+
+//---------------------------------------------------------------------
+	/**
+	 * Remove peer from group
+	 * @param peer
+	 */
+	public void leave(final ZrePeer peer) {
+		peers.remove(peer.identity());
+		peer.incStatus();
+	}
+
+//---------------------------------------------------------------------
+	/**
+	 * Send message to all peers in group
+	 * @param msg
+	 */
+	public void send(ZreMsg msg) {
+		for (final ZrePeer peer : peers.values())
+			peer.send(msg.dup());
+
+		msg.destroy();
+	}
+
+	/**
+	 * Get name of this group
+	 * @return
+	 */
+	public String name() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("ZreGroup(%s, peers=%d)", name, peers.size());
+	}
 }
