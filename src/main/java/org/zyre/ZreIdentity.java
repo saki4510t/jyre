@@ -143,7 +143,7 @@ public class ZreIdentity implements Serializable, Comparable<ZreIdentity> {
 	public String toString() {
 		final ByteBuffer buf = ByteBuffer.wrap(mIdentity, 1, 16);
 		final UUID uuid = new UUID(buf.getLong(), buf.getLong());
-		return uuid.toString().replace("-", "").toUpperCase();
+		return uuid.toString();
 	}
 
 	@Override

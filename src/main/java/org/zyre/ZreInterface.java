@@ -685,7 +685,8 @@ public class ZreInterface {
 						log.info(ZreLogMsg.ZRE_LOG_MSG_EVENT_EXIT, peer.identityString(), peer.endpoint());
 						//  If peer has really vanished, expire it
 						appPipe.sendMore("EXIT");
-						appPipe.send(identity.toString());
+						appPipe.sendMore(identity.toString());
+						appPipe.send(peer.name());
 						deletePeerFromGroups(peer_groups, peer);
 						it.remove();
 						peer.destroy();
