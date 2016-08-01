@@ -37,8 +37,9 @@ public class TestZreMsg
 
         self = new ZreMsg (ZreMsg.HELLO);
         self.setSequence ((byte) 123);
-        self.setIpaddress ("Life is short but Now lasts for ever");
-        self.setMailbox ((byte) 123);
+//      self.setIpaddress ("Life is short but Now lasts for ever");
+//      self.setMailbox ((byte) 123);
+        self.setEndpoint("Life is short but Now lasts for ever:%d", (byte)123);
         self.appendGroups ("Name: %s", "Brutus");
         self.appendGroups ("Age: %d", 43);
         self.setStatus ((byte) 123);
@@ -49,8 +50,9 @@ public class TestZreMsg
         self = ZreMsg.recv (input);
         assert (self != null);
         assertEquals (self.sequence (), 123);
-        assertEquals (self.ipaddress (), "Life is short but Now lasts for ever");
-        assertEquals (self.mailbox (), 123);
+//      assertEquals (self.ipaddress (), "Life is short but Now lasts for ever");
+//      assertEquals (self.mailbox (), 123);
+        assertEquals (self.endpoint(), "Life is short but Now lasts for ever:123");
         assertEquals (self.groups ().size (), 2);
         assertEquals (self.groups ().get (0), "Name: Brutus");
         assertEquals (self.groups ().get (1), "Age: 43");

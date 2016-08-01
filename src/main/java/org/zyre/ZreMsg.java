@@ -1014,7 +1014,6 @@ public class ZreMsg {
 
 	/**
 	 * Set the message routing_id
-	 * @return
 	 */
 	public void setRoutingId(final ZFrame routing_id) {
 		if (this.routing_id != null)
@@ -1024,7 +1023,7 @@ public class ZreMsg {
 
 	/**
 	 * Get routing_id as ZreIdentity
-	 * @return
+	 * @return routing id
 	 */
 	public ZreIdentity identity() {
 		return new ZreIdentity(routing_id.getData());
@@ -1032,7 +1031,7 @@ public class ZreMsg {
 //--------------------------------------------------------------------------
 	/**
 	 * Get the zre_msg id
-	 * @return
+	 * @return zre-msg id
 	 */
 	public int id() {
 		return id;
@@ -1040,7 +1039,6 @@ public class ZreMsg {
 
 	/**
 	 * Set the zre_msg id
-	 * @return
 	 */
 	public void setId(final int id) {
 		this.id = id;
@@ -1049,7 +1047,7 @@ public class ZreMsg {
 //--------------------------------------------------------------------------
 	/**
 	 * Get the sequence field
-	 * @return
+	 * @return sequence number
 	 */
 	public int sequence() {
 		return sequence;
@@ -1057,7 +1055,6 @@ public class ZreMsg {
 
 	/**
 	 * Set the sequence field
-	 * @return
 	 */
 	public void setSequence(final int sequence) {
 		this.sequence = sequence;
@@ -1066,7 +1063,7 @@ public class ZreMsg {
 //--------------------------------------------------------------------------
 	/**
 	 * Get the endpoint field
-	 * @return
+	 * @return endpoint
 	 */
 	public String endpoint() {
 		return endpoint;
@@ -1074,7 +1071,6 @@ public class ZreMsg {
 
 	/**
 	 * Set the endpoint field
-	 * @return
 	 */
 	public void setEndpoint(final String format, final Object... args) {
 		//  Format into newly allocated string
