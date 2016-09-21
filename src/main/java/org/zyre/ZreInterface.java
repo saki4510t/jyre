@@ -339,7 +339,7 @@ public class ZreInterface {
 			for (final ZreGroup group : peer_groups.values()) {
 				group.destroy();
 			}
-			own_groups.clear();
+			peer_groups.clear();	// saki, fixed own_groups => peer_groups
 			for (final ZreGroup group : own_groups.values()) {
 				group.destroy();
 			}
