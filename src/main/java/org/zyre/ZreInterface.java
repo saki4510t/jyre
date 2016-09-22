@@ -401,12 +401,12 @@ public class ZreInterface {
 					peer.send(msg);
 
 					log.info(ZreLogMsg.ZRE_LOG_MSG_EVENT_ENTER, peer.identityString(), peer.endpoint(), endpoint);
-
-					//  Now tell the caller about the peer
-					appPipe.sendMore("ENTER");
-					appPipe.sendMore(peer.identityString());
-					appPipe.sendMore(peer.name());
-					appPipe.send(peer_endpoint);
+// saki move to #recvFromPeer when receive ZreMsg.HELLO
+//					//  Now tell the caller about the peer
+//					appPipe.sendMore("ENTER");
+//					appPipe.sendMore(peer.identityString());
+//					appPipe.sendMore(peer.name());
+//					appPipe.send(peer_endpoint);
 				}
 			}
 			return peer;
@@ -589,6 +589,11 @@ public class ZreInterface {
 
 				//  Store peer headers for future reference
 				peer.setHeaders(msg.headers());
+				//  Pass up to caller API as ENTER event
+				appPipe.sendMore("ENTER");
+				appPipe.sendMore(peer.identityString());
+				appPipe.sendMore(peer.name());
+				appPipe.send(peer_endpoint);
 			} else if (msg.id() == ZreMsg.WHISPER) {
 				//  Pass up to caller API as WHISPER event
 				final ZFrame cookie = msg.content();
