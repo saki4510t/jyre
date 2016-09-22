@@ -593,7 +593,7 @@ public class ZreInterface {
 				//  Store peer headers for future reference
 				peer.setHeaders(msg.headers());
 				//  Pass up to caller API as ENTER event
-				if (!hasName()) {
+				if (!hasName) {
 					appPipe.sendMore("ENTER");
 					appPipe.sendMore(peer.identityString());
 					appPipe.sendMore(peer.name());
