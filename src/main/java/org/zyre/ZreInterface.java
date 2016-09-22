@@ -593,7 +593,7 @@ public class ZreInterface {
 				appPipe.sendMore("ENTER");
 				appPipe.sendMore(peer.identityString());
 				appPipe.sendMore(peer.name());
-				appPipe.send(peer_endpoint);
+				appPipe.send(peer.endpoint());
 			} else if (msg.id() == ZreMsg.WHISPER) {
 				//  Pass up to caller API as WHISPER event
 				final ZFrame cookie = msg.content();
