@@ -314,4 +314,8 @@ public class ZrePeer {
 	public String name() {
 		return TextUtils.isEmpty(name) ? identity.toString() : name;
 	}
+	
+	public boolean hasName() {
+		return !TextUtils.isEmpty(name);
+	}
 }

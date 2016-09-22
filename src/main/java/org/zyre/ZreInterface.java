@@ -402,11 +402,13 @@ public class ZreInterface {
 
 					log.info(ZreLogMsg.ZRE_LOG_MSG_EVENT_ENTER, peer.identityString(), peer.endpoint(), endpoint);
 // saki move to #recvFromPeer when receive ZreMsg.HELLO
-//					//  Now tell the caller about the peer
-//					appPipe.sendMore("ENTER");
-//					appPipe.sendMore(peer.identityString());
-//					appPipe.sendMore(peer.name());
-//					appPipe.send(peer_endpoint);
+					if (peer.hasName()) {
+						//  Now tell the caller about the peer
+						appPipe.sendMore("ENTER");
+						appPipe.sendMore(peer.identityString());
+						appPipe.sendMore(peer.name());
+						appPipe.send(peer_endpoint);
+					}
 				}
 			}
 			return peer;
@@ -579,6 +581,7 @@ public class ZreInterface {
 
 			//  Now process each command
 			if (msg.id() == ZreMsg.HELLO) {
+				final boolean hasName = peer.hasName();
 				peer.setName(msg.name());
 				//  Join peer to listed groups
 				for (final String group_name : msg.groups()) {
@@ -590,10 +593,12 @@ public class ZreInterface {
 				//  Store peer headers for future reference
 				peer.setHeaders(msg.headers());
 				//  Pass up to caller API as ENTER event
-				appPipe.sendMore("ENTER");
-				appPipe.sendMore(peer.identityString());
-				appPipe.sendMore(peer.name());
-				appPipe.send(peer.endpoint());
+				if (!hasName()) {
+					appPipe.sendMore("ENTER");
+					appPipe.sendMore(peer.identityString());
+					appPipe.sendMore(peer.name());
+					appPipe.send(peer.endpoint());
+				}
 			} else if (msg.id() == ZreMsg.WHISPER) {
 				//  Pass up to caller API as WHISPER event
 				final ZFrame cookie = msg.content();
